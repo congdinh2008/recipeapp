@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layouts/layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+</head>
+
+<body>
+    <section layout:fragment="content" class="p-6">
+        <div class="contact-header text-center">
+            <h1 class="text-2xl font-bold mb-4">Contact Us</h1>
+            <p class="mb-6">We'd love to hear from you! Whether you have a question about recipes, features, or anything
+                else, our team is ready to answer all your questions.</p>
+        </div>
+
+        <div class="contact-info flex justify-between">
+            <div class="w-1/2">
+                <h2 class="text-xl font-semibold mb-2">Our Address</h2>
+                <p>Recipe App Headquarters</p>
+                <p>
+                    <i class="fa-solid fa-map-marker-alt text-blue-500 me-2"></i>
+                    123 Main Street, Hanoi, Vietnam
+                </p>
+                <p>
+                    <i class="fa-solid fa-phone text-blue-500 me-2"></i>
+                    <a href="tel:+84 123 456 789">
+                        +84 123 456 789
+                    </a>
+                </p>
+                <p>
+                    <i class="fa-solid fa-envelope text-blue-500 me-2"></i>
+                    <a href="mailto:contact@recipe.com">
+                        contact@recipe.com
+                    </a>
+                </p>
+            </div>
+
+            <div class="w-1/2">
+                <h2 class="text-xl font-semibold mb-2">Find Us Here</h2>
+                <div class="w-full h-64">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29793.980453128566!2d105.81636412389228!3d21.022778419201227!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab9bd9861ca1%3A0xe7887f7b72ca17a9!2sHanoi%2C%20Vietnam!5e0!3m2!1sen!2s!4v1728140176700!5m2!1sen!2s"
+                        width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>
