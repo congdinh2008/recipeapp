@@ -1,0 +1,17 @@
+<aside th:fragment="sidebar" class="w-[250px] border-r border-slate-300 shadow-md">
+    <div class="menu-header border-b border-slate-300 text-2xl font-semibold p-3">
+        <i class="fa-solid fa-gauge-high me-3"></i> Management
+    </div>
+    <ul class="menu-list">
+        <li class="menu-item">
+            <a th:href="@{/manage/categories}" class="menu-link block p-3 hover:bg-blue-500 hover:text-white">
+                <i class="fa-solid fa-list me-2"></i> Categories
+            </a>
+        </li>
+        <li class="menu-item">
+            <a th:href="@{/manage/recipes}" class="menu-link block p-3 hover:bg-blue-500 hover:text-white">
+                <i class="fa-solid fa-boxes-packing me-2"></i> Recipes
+            </a>
+        </li>
+    </ul>
+</aside>

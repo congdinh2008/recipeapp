@@ -1,0 +1,23 @@
+<header layout:fragment="header" class="bg-blue-500 flex justify-between items-center text-white px-4">
+    <a th:href="@{/}" class="nav-brand text-2xl font-bold">Recipe App</a>
+    <nav>
+        <ul class="flex justify-center items-center">
+            <li>
+                <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/}">Home</a>
+            </li>
+            <li>
+                <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/manage/categories}">Management</a>
+            </li>
+            <li>
+                <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/about}">About</a>
+            </li>
+            <li>
+                <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/contact}">Contact</a>
+            </li>
+        </ul>
+    </nav>
+    <div class="profile-menu">
+        <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/login}">Login</a>
+        <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/register}">Register</a>
+    </div>
+</header>
