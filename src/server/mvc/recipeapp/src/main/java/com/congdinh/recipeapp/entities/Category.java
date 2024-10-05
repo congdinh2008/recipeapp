@@ -1,5 +1,6 @@
 package com.congdinh.recipeapp.entities;
 
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -21,4 +22,7 @@ public class Category {
 
     @Column(columnDefinition = "NVARCHAR(500)")
     private String description;
+
+    @OneToMany(mappedBy = "category")
+    private Set<Recipe> recipes;
 }

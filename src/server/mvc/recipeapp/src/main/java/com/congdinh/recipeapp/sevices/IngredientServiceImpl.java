@@ -14,8 +14,6 @@ import com.congdinh.recipeapp.dtos.ingredient.IngredientDTO;
 import com.congdinh.recipeapp.entities.Ingredient;
 import com.congdinh.recipeapp.repositories.IngredientRepository;
 
-import jakarta.persistence.criteria.Predicate;
-
 @Service
 @Transactional
 public class IngredientServiceImpl implements IngredientService {
