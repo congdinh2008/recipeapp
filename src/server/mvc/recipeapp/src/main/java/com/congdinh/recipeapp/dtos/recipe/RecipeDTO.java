@@ -1,6 +1,8 @@
 package com.congdinh.recipeapp.dtos.recipe;
 
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
 
@@ -45,4 +47,6 @@ public class RecipeDTO {
     private UUID categoryId;
 
     private CategoryDTO category;
+
+    private List<RecipeIngredientDTO> ingredients = new ArrayList<>();
 }

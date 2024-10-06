@@ -12,8 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.congdinh.recipeapp.dtos.category.CategoryDTO;
 import com.congdinh.recipeapp.dtos.recipe.RecipeCreateDTO;
 import com.congdinh.recipeapp.dtos.recipe.RecipeDTO;
+import com.congdinh.recipeapp.dtos.recipe.RecipeIngredientDTO;
 import com.congdinh.recipeapp.entities.Category;
 import com.congdinh.recipeapp.entities.Recipe;
+import com.congdinh.recipeapp.entities.RecipeIngredient;
+import com.congdinh.recipeapp.entities.RecipeIngredientId;
+import com.congdinh.recipeapp.repositories.IngredientRepository;
+import com.congdinh.recipeapp.repositories.RecipeIngredientRepository;
 import com.congdinh.recipeapp.repositories.RecipeRepository;
 
 import jakarta.persistence.criteria.Predicate;
@@ -22,9 +27,14 @@ import jakarta.persistence.criteria.Predicate;
 @Transactional
 public class RecipeServiceImpl implements RecipeService {
     private final RecipeRepository recipeRepository;
+    private final IngredientRepository ingredientRepository;
+    private final RecipeIngredientRepository recipeIngredientRepository;
 
-    public RecipeServiceImpl(RecipeRepository recipeRepository) {
+    public RecipeServiceImpl(RecipeRepository recipeRepository, IngredientRepository ingredientRepository,
+            RecipeIngredientRepository recipeIngredientRepository) {
         this.recipeRepository = recipeRepository;
+        this.ingredientRepository = ingredientRepository;
+        this.recipeIngredientRepository = recipeIngredientRepository;
     }
 
     @Override
@@ -113,6 +123,20 @@ public class RecipeServiceImpl implements RecipeService {
                 recipeDTO.setCategory(categoryDTO);
             }
 
+            // Get ingredients of recipe and convert to DTO
+            var recipeIngredientDTOs = recipe.getIngredients().stream().map(recipeIngredient -> {
+                var recipeIngredientDTO = new RecipeIngredientDTO();
+
+                recipeIngredientDTO.setIngredientId(recipeIngredient.getIngredient().getId());
+                recipeIngredientDTO.setIngredientName(recipeIngredient.getIngredient().getName());
+                recipeIngredientDTO.setAmount(recipeIngredient.getAmount());
+
+                return recipeIngredientDTO;
+            }).toList();
+
+            // Set ingredients to recipeDTO
+            recipeDTO.setIngredients(recipeIngredientDTOs);
+
             return recipeDTO;
         });
 
@@ -180,6 +204,20 @@ public class RecipeServiceImpl implements RecipeService {
                 recipeDTO.setCategory(categoryDTO);
             }
 
+            // Get ingredients of recipe and convert to DTO
+            var recipeIngredientDTOs = recipe.getIngredients().stream().map(recipeIngredient -> {
+                var recipeIngredientDTO = new RecipeIngredientDTO();
+
+                recipeIngredientDTO.setIngredientId(recipeIngredient.getIngredient().getId());
+                recipeIngredientDTO.setIngredientName(recipeIngredient.getIngredient().getName());
+                recipeIngredientDTO.setAmount(recipeIngredient.getAmount());
+
+                return recipeIngredientDTO;
+            }).toList();
+
+            // Set ingredients to recipeDTO
+            recipeDTO.setIngredients(recipeIngredientDTOs);
+
             return recipeDTO;
         });
 
@@ -219,6 +257,20 @@ public class RecipeServiceImpl implements RecipeService {
             // Set categoryDTO to recipeDTO
             recipeDTO.setCategory(categoryDTO);
         }
+
+        // Get ingredients of recipe and convert to DTO
+        var recipeIngredientDTOs = recipe.getIngredients().stream().map(recipeIngredient -> {
+            var recipeIngredientDTO = new RecipeIngredientDTO();
+
+            recipeIngredientDTO.setIngredientId(recipeIngredient.getIngredient().getId());
+            recipeIngredientDTO.setIngredientName(recipeIngredient.getIngredient().getName());
+            recipeIngredientDTO.setAmount(recipeIngredient.getAmount());
+
+            return recipeIngredientDTO;
+        }).toList();
+
+        // Set ingredients to recipeDTO
+        recipeDTO.setIngredients(recipeIngredientDTOs);
 
         // Return DTO
         return recipeDTO;
@@ -363,6 +415,69 @@ public class RecipeServiceImpl implements RecipeService {
         var isDeleted = recipeRepository.findById(id).isEmpty();
 
         // Return if entity is deleted
+        return isDeleted;
+    }
+
+    @Override
+    public boolean addIngredient(RecipeDTO recipe, RecipeIngredientDTO recipeIngredientDTO) {
+        if (recipe == null) {
+            throw new IllegalArgumentException("Recipe is required");
+        }
+
+        if (recipeIngredientDTO == null) {
+            throw new IllegalArgumentException("Recipe ingredient is required");
+        }
+
+        var recipeEntity = recipeRepository.findById(recipe.getId()).orElse(null);
+        if (recipeEntity == null) {
+            return false;
+        }
+
+        var ingredient = ingredientRepository.findById(recipeIngredientDTO.getIngredientId()).orElse(null);
+        if (ingredient == null) {
+            return false;
+        }
+
+        var recipeIngredientId = new RecipeIngredientId(recipeEntity.getId(), ingredient.getId());
+        var recipeIngredient = new RecipeIngredient();
+        recipeIngredient.setId(recipeIngredientId);
+        recipeIngredient.setRecipe(recipeEntity);
+        recipeIngredient.setIngredient(ingredient);
+        recipeIngredient.setAmount(recipeIngredientDTO.getAmount());
+
+        recipeIngredient = recipeIngredientRepository.save(recipeIngredient);
+
+        return recipeIngredient != null;
+    }
+
+    @Override
+    public boolean deleteIngredient(RecipeDTO recipe, UUID ingredientId) {
+        if (recipe == null) {
+            throw new IllegalArgumentException("Recipe is required");
+        }
+
+        var recipeEntity = recipeRepository.findById(recipe.getId()).orElse(null);
+        if (recipeEntity == null) {
+            return false;
+        }
+
+        var ingredient = ingredientRepository.findById(ingredientId).orElse(null);
+
+        if (ingredient == null) {
+            return false;
+        }
+
+        var recipeIngredientId = new RecipeIngredientId(recipeEntity.getId(), ingredient.getId());
+        var recipeIngredient = recipeIngredientRepository.findById(recipeIngredientId).orElse(null);
+
+        if (recipeIngredient == null) {
+            return false;
+        }
+
+        recipeIngredientRepository.delete(recipeIngredient);
+        
+        var isDeleted = recipeIngredientRepository.findById(recipeIngredientId).isEmpty();
+
         return isDeleted;
     }
 }

@@ -5,6 +5,9 @@ import java.util.UUID;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,4 +21,7 @@ public class Ingredient {
 
     @Column(nullable = false, unique = true, columnDefinition = "NVARCHAR(100)")
     private String name;
+
+    @OneToMany(mappedBy = "ingredient")
+    private Set<RecipeIngredient> recipes = new HashSet<>();
 }

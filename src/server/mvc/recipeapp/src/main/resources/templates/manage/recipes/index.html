@@ -80,6 +80,7 @@
                                         th:class="${sortBy == 'servings' and order == 'asc' ? 'fa-solid fa-arrow-down-short-wide' : 'fa-solid  fa-arrow-up-wide-short'}"></i>
                                 </a>
                             </th>
+                            <th>Ingredients</th>
                             <th>Category</th>
                             <th>Actions</th>
                         </tr>
@@ -94,6 +95,11 @@
                             <td th:text="${recipe.prepTime}"></td>
                             <td th:text="${recipe.cookTime}"></td>
                             <td th:text="${recipe.servings}"></td>
+                            <td>
+                                <ul>
+                                    <li th:each="ingredient : ${recipe.ingredients}" th:text="${ingredient.ingredientName}"></li>
+                                </ul>
+                            </td>
                             <td th:text="${recipe.category.name}"></td>
                             <td>
                                 <div class="action flex justify-center items-center gap-3">

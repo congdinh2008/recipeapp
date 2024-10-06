@@ -5,6 +5,9 @@ import java.util.UUID;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,4 +39,7 @@ public class Recipe {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false, referencedColumnName = "id")
     private Category category;
+
+    @OneToMany(mappedBy = "recipe")
+    private Set<RecipeIngredient> ingredients = new HashSet<>();
 }

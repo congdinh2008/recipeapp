@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.congdinh.recipeapp.dtos.recipe.RecipeCreateDTO;
 import com.congdinh.recipeapp.dtos.recipe.RecipeDTO;
+import com.congdinh.recipeapp.dtos.recipe.RecipeIngredientDTO;
 
 public interface RecipeService {
     List<RecipeDTO> findAll();
@@ -23,4 +24,8 @@ public interface RecipeService {
     RecipeDTO update(UUID id, RecipeDTO recipeDTO);
 
     boolean deleteById(UUID id);
+
+    boolean addIngredient(RecipeDTO recipe, RecipeIngredientDTO recipeIngredientDTO);
+
+    boolean deleteIngredient(RecipeDTO recipe, UUID ingredientId);
 }

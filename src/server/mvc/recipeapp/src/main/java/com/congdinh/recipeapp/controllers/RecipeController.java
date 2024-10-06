@@ -26,6 +26,7 @@ import com.congdinh.recipeapp.dtos.recipe.RecipeCreateDTO;
 import com.congdinh.recipeapp.dtos.recipe.RecipeDTO;
 import com.congdinh.recipeapp.dtos.messages.Message;
 import com.congdinh.recipeapp.sevices.CategoryService;
+import com.congdinh.recipeapp.sevices.IngredientService;
 import com.congdinh.recipeapp.sevices.RecipeService;
 
 import jakarta.validation.Valid;
@@ -35,10 +36,14 @@ import jakarta.validation.Valid;
 public class RecipeController {
     private final RecipeService recipeService;
     private final CategoryService categoryService;
+    private final IngredientService ingredientService;
 
-    public RecipeController(RecipeService recipeService, CategoryService categoryService) {
+    public RecipeController(RecipeService recipeService,
+            CategoryService categoryService,
+            IngredientService ingredientService) {
         this.recipeService = recipeService;
         this.categoryService = categoryService;
+        this.ingredientService = ingredientService;
     }
 
     @GetMapping
@@ -180,6 +185,9 @@ public class RecipeController {
         var categories = categoryService.findAll();
         model.addAttribute("categories", categories);
 
+        var ingredients = ingredientService.findAll();
+        model.addAttribute("ingredients", ingredients);
+
         return "manage/recipes/edit";
     }
 
@@ -195,6 +203,10 @@ public class RecipeController {
 
             var categories = categoryService.findAll();
             model.addAttribute("categories", categories);
+
+            var ingredients = ingredientService.findAll();
+            model.addAttribute("ingredients", ingredients);
+
             return "manage/recipes/edit";
         }
 
@@ -226,8 +238,12 @@ public class RecipeController {
                 e.printStackTrace();
                 Message errorMessage = new Message("error", "Failed to upload image");
                 model.addAttribute("message", errorMessage);
+
                 var categories = categoryService.findAll();
                 model.addAttribute("categories", categories);
+
+                var ingredients = ingredientService.findAll();
+                model.addAttribute("ingredients", ingredients);
 
                 bindingResult.rejectValue("image", "image", "Failed to upload image");
                 return "manage/recipes/edit";
@@ -242,6 +258,10 @@ public class RecipeController {
 
             var categories = categoryService.findAll();
             model.addAttribute("categories", categories);
+
+            var ingredients = ingredientService.findAll();
+            model.addAttribute("ingredients", ingredients);
+
             return "manage/recipes/edit";
 
         }
