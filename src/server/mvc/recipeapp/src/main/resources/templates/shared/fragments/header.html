@@ -6,7 +6,8 @@
                 <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/}">Home</a>
             </li>
             <li>
-                <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/manage/categories}">Management</a>
+                <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/manage/categories}"
+                    sec:authorize="hasRole('ADMIN')">Management</a>
             </li>
             <li>
                 <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/about}">About</a>
@@ -17,7 +18,13 @@
         </ul>
     </nav>
     <div class="profile-menu">
-        <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/login}">Login</a>
-        <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/register}">Register</a>
+        <div class="anonymous" sec:authorize="isAnonymous()">
+            <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/auth/login}">Login</a>
+            <a class="nav-link inline-block p-4 hover:bg-blue-700" th:href="@{/auth/register}">Register</a>
+        </div>
+        <div class="authenticated" sec:authorize="isAuthenticated()">
+            <span>Welcome, <span sec:authentication="name"></span>!</span>
+            <a th:href="@{/logout}" class="nav-link inline-block p-4 hover:bg-blue-700">Logout</a>
+        </div>
     </div>
 </header>

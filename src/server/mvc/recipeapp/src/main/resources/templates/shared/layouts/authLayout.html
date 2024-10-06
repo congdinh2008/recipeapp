@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - $LAYOUT_TITLE">Recipe App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <main class="relative h-screen overflow-hidden">
+        <img th:src="@{/images/bg_auth.jpg}" alt="Background"
+            class="object-cover h-screen w-full absolute top-0 left-0 z-0">
+        <div class="overlay absolute top-0 left-0 h-screen w-full bg-slate-950 opacity-50"></div>
+        <div layout:fragment="content">
+
+        </div>
+    </main>
+</body>
+
+</html>
