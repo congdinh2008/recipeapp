@@ -11,6 +11,17 @@
     <section layout:fragment="content" class="text-center">
         <h1 class="text-2xl">Welcome to Recipe App</h1>
         <p>Here you can find and share recipes.</p>
+
+        <div class="recipe-list flex flex-wrap justify-between items-center">
+            <div class="card w-1/4 p-3" th:each="recipe : ${recipes}">
+                <img th:src="@{${recipe.image}}" alt="Recipe Image" class="w-full h-48 object-cover">
+                <div class="card-body">
+                    <h2 class="text-xl font-bold" th:text="${recipe.title}"></h2>
+                    <a th:href="@{/recipes/{id}(id=${recipe.id})}"
+                        class=" bg-blue-500 text-white p-2 rounded-full block mt-2">View Recipe</a>
+                </div>
+            </div>
+        </div>
     </section>
 </body>
 

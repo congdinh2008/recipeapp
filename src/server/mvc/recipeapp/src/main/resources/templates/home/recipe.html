@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layouts/layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+
+<body>
+    <section layout:fragment="content" class="recipe flex justify-between">
+        <div class="recipe-details w-2/5 pe-3">
+            <h1 class="text-2xl font-bold" th:text="${recipe.title}"></h1>
+            <div class="recipe-info flex items-center gap-3 my-3">
+                <div class="recipe-info-item">
+                    <i class="fas fa-utensils"></i>
+                    <span th:text="${recipe.servings}"></span>
+                </div>
+                <div class="recipe-info-item">
+                    <i class="fas fa-clock"></i>
+                    <span th:text="${recipe.prepTime}"></span>
+                </div>
+                <div class="recipe-info-item">
+                    <i class="fas fa-cocktail"></i>
+                    <span th:text="${recipe.cookTime}"></span>
+                </div>
+            </div>
+            <div class="recipe-ingredients">
+                <h2 class="text-xl font-bold">Ingredients</h2>
+                <ul>
+                    <li th:each="ingredient : ${recipe.ingredients}">
+                        <span th:text="${ingredient.amount}"></span>
+                        <span th:text="${ingredient.ingredientName}"></span>
+                    </li>
+                </ul>
+            </div>
+            <div class="recipe-description">
+                <h2 class="text-xl font-bold">Description</h2>
+                <!-- Displacy description from html string -->
+                <p class="text-gray-500" th:utext="${recipe.description}"></p>
+            </div>
+        </div>
+        <div class="recipe-image w-3/5">
+            <img th:src="@{${recipe.image}}" alt="Recipe Image" class="w-full h-auto object-cover">
+        </div>
+
+    </section>
+</body>
+
+</html>
