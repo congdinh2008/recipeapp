@@ -3,6 +3,7 @@ package com.congdinh.recipeapp.controllers;
 import java.util.UUID;
 
 import org.springframework.data.domain.*;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -19,15 +20,18 @@ import jakarta.validation.Valid;
 @Tag(name = "Ingredient", description = "Ingredient API")
 public class IngredientController {
     private final IngredientService ingredientService;
+    private final PagedResourcesAssembler<IngredientDTO> pagedResourcesAssembler;
 
-    public IngredientController(IngredientService ingredientService) {
+    public IngredientController(IngredientService ingredientService,
+            PagedResourcesAssembler<IngredientDTO> pagedResourcesAssembler) {
         this.ingredientService = ingredientService;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @GetMapping
     @Operation(summary = "Get all ingredients")
     @ApiResponse(responseCode = "200", description = "Return all ingredients")
-    public ResponseEntity<Page<IngredientDTO>> index(
+    public ResponseEntity<?> index(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false, defaultValue = "name") String sortBy, // Xac dinh truong sap xep
             @RequestParam(required = false, defaultValue = "asc") String order, // Xac dinh chieu sap xep
@@ -41,10 +45,10 @@ public class IngredientController {
             pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
         }
 
-        // Search ingredient by keyword and paging
-        var ingredients = ingredientService.findAll(keyword, pageable);
+        var result = ingredientService.findAll(keyword, pageable);
+        var pagedModel = pagedResourcesAssembler.toModel(result);
 
-        return ResponseEntity.ok(ingredients);
+        return ResponseEntity.ok(pagedModel);
     }
 
     @GetMapping("/{id}")

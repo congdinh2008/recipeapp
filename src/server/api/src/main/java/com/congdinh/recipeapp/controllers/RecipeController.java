@@ -5,6 +5,7 @@ import java.time.*;
 import java.util.*;
 
 import org.springframework.data.domain.*;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -26,15 +27,17 @@ import jakarta.validation.Valid;
 @Tag(name = "Recipe", description = "Recipe API")
 public class RecipeController {
     private final RecipeService recipeService;
+    private final PagedResourcesAssembler<RecipeDTO> pagedResourcesAssembler;
 
-    public RecipeController(RecipeService recipeService) {
+    public RecipeController(RecipeService recipeService, PagedResourcesAssembler<RecipeDTO> pagedResourcesAssembler) {
         this.recipeService = recipeService;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @GetMapping
     @Operation(summary = "Get all recipes")
     @ApiResponse(responseCode = "200", description = "Return all recipes")
-    public ResponseEntity<Page<RecipeDTO>> index(
+    public ResponseEntity<?> index(
             @RequestParam(required = false) String keyword,
             @RequestParam(name = "categoryName", required = false) String categoryName,
             @RequestParam(required = false, defaultValue = "title") String sortBy, // Xac dinh truong sap xep
@@ -49,10 +52,10 @@ public class RecipeController {
             pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
         }
 
-        // Search recipe by keyword and paging
-        var recipes = recipeService.findAll(keyword, categoryName, pageable);
+        var result = recipeService.findAll(keyword, pageable);
+        var pagedModel = pagedResourcesAssembler.toModel(result);
 
-        return ResponseEntity.ok(recipes);
+        return ResponseEntity.ok(pagedModel);
     }
 
     @GetMapping("/{id}")

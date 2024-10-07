@@ -3,6 +3,7 @@ package com.congdinh.recipeapp.controllers;
 import java.util.UUID;
 
 import org.springframework.data.domain.*;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +22,11 @@ import jakarta.validation.Valid;
 @Tag(name = "Role", description = "Role API")
 public class RoleController {
     private final RoleService roleService;
+    private final PagedResourcesAssembler<RoleDTO> pagedResourcesAssembler;
 
-    public RoleController(RoleService roleService) {
+    public RoleController(RoleService roleService, PagedResourcesAssembler<RoleDTO> pagedResourcesAssembler) {
         this.roleService = roleService;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @GetMapping
@@ -35,7 +38,7 @@ public class RoleController {
             @RequestParam(required = false, defaultValue = "asc") String order,
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer size) {
-        Pageable pageable;
+        Pageable pageable = null;
 
         if (order.equals("asc")) {
             pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
@@ -44,7 +47,9 @@ public class RoleController {
         }
 
         var result = roleService.findAll(keyword, pageable);
-        return ResponseEntity.ok(result);
+        var pagedModel = pagedResourcesAssembler.toModel(result);
+
+        return ResponseEntity.ok(pagedModel);
     }
 
     @GetMapping("/{id}")

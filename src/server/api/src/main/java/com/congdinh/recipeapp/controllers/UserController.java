@@ -3,6 +3,7 @@ package com.congdinh.recipeapp.controllers;
 import java.util.UUID;
 
 import org.springframework.data.domain.*;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -22,15 +23,17 @@ import jakarta.validation.Valid;
 @Tag(name = "User", description = "User API")
 public class UserController {
     private final UserService userService;
+    private final PagedResourcesAssembler<UserDTO> pagedResourcesAssembler;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PagedResourcesAssembler<UserDTO> pagedResourcesAssembler) {
         this.userService = userService;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @GetMapping
     @Operation(summary = "Get all users")
     @ApiResponse(responseCode = "200", description = "Return all users")
-    public ResponseEntity<Page<UserDTO>> index(
+    public ResponseEntity<?> index(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false, defaultValue = "firstName") String sortBy, // Xac dinh truong sap xep
             @RequestParam(required = false, defaultValue = "asc") String order, // Xac dinh chieu sap xep
@@ -44,10 +47,10 @@ public class UserController {
             pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
         }
 
-        // Search user by keyword and paging
-        var users = userService.findAll(keyword, pageable);
+        var result = userService.findAll(keyword, pageable);
+        var pagedModel = pagedResourcesAssembler.toModel(result);
 
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(pagedModel);
     }
 
     @GetMapping("/{id}")
