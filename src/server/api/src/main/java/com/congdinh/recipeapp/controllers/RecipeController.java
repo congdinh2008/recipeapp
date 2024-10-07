@@ -1,60 +1,46 @@
 package com.congdinh.recipeapp.controllers;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.nio.file.*;
+import java.time.*;
+import java.util.*;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.congdinh.recipeapp.dtos.recipe.RecipeCreateDTO;
-import com.congdinh.recipeapp.dtos.recipe.RecipeDTO;
+import com.congdinh.recipeapp.dtos.recipe.*;
 import com.congdinh.recipeapp.dtos.messages.Message;
-import com.congdinh.recipeapp.sevices.CategoryService;
-import com.congdinh.recipeapp.sevices.IngredientService;
-import com.congdinh.recipeapp.sevices.RecipeService;
+import com.congdinh.recipeapp.sevices.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Controller
-@RequestMapping("/manage/recipes")
+@RestController
+@RequestMapping("/api/recipes")
+@Tag(name = "Recipe", description = "Recipe API")
 public class RecipeController {
     private final RecipeService recipeService;
-    private final CategoryService categoryService;
-    private final IngredientService ingredientService;
 
-    public RecipeController(RecipeService recipeService,
-            CategoryService categoryService,
-            IngredientService ingredientService) {
+    public RecipeController(RecipeService recipeService) {
         this.recipeService = recipeService;
-        this.categoryService = categoryService;
-        this.ingredientService = ingredientService;
     }
 
     @GetMapping
-    public String index(
+    @Operation(summary = "Get all recipes")
+    @ApiResponse(responseCode = "200", description = "Return all recipes")
+    public ResponseEntity<Page<RecipeDTO>> index(
             @RequestParam(required = false) String keyword,
             @RequestParam(name = "categoryName", required = false) String categoryName,
             @RequestParam(required = false, defaultValue = "title") String sortBy, // Xac dinh truong sap xep
             @RequestParam(required = false, defaultValue = "asc") String order, // Xac dinh chieu sap xep
             @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "10") Integer size,
-            Model model) {
+            @RequestParam(required = false, defaultValue = "10") Integer size) {
         Pageable pageable = null;
 
         if (order.equals("asc")) {
@@ -65,68 +51,33 @@ public class RecipeController {
 
         // Search recipe by keyword and paging
         var recipes = recipeService.findAll(keyword, categoryName, pageable);
-        model.addAttribute("recipes", recipes);
 
-        // Passing keyword to view
-        model.addAttribute("keyword", keyword);
+        return ResponseEntity.ok(recipes);
+    }
 
-        // Passing total pages to view
-        model.addAttribute("totalPages", recipes.getTotalPages());
+    @GetMapping("/{id}")
+    @Operation(summary = "Get recipe by id")
+    @ApiResponse(responseCode = "200", description = "Return recipe by id")
+    @ApiResponse(responseCode = "404", description = "recipe not found")
+    public ResponseEntity<RecipeDTO> show(@PathVariable UUID id) {
+        var result = recipeService.findById(id);
 
-        // Passing total elements to view
-        model.addAttribute("totalElements", recipes.getTotalElements());
-
-        // Passing current sortBy to view
-        model.addAttribute("sortBy", sortBy);
-
-        // Passing current order to view
-        model.addAttribute("order", order);
-
-        // Limit page
-        model.addAttribute("pageLimit", 3);
-
-        // Passing current page to view
-        model.addAttribute("page", page);
-
-        // Passing current size to view
-        model.addAttribute("pageSize", size);
-
-        // Passing pageSizes to view
-        model.addAttribute("pageSizes", new Integer[] { 10, 20, 30, 50, 100 });
-
-        var categories = categoryService.findAll();
-        model.addAttribute("categories", categories);
-
-        // Get message from redirect
-        if (!model.containsAttribute("message")) {
-            model.addAttribute("message", new Message());
+        if (result == null) {
+            return ResponseEntity.notFound().build();
         }
-        return "manage/recipes/index";
+
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/create")
-    public String create(Model model) {
-        var recipeCreateDTO = new RecipeCreateDTO();
-        model.addAttribute("recipeCreateDTO", recipeCreateDTO);
-
-        var categories = categoryService.findAll();
-        model.addAttribute("categories", categories);
-
-        return "manage/recipes/create";
-    }
-
-    @PostMapping("/create")
-    public String create(@ModelAttribute @Valid RecipeCreateDTO recipeCreateDTO,
+    @PostMapping
+    @Operation(summary = "Create new recipe")
+    @ApiResponse(responseCode = "200", description = "Return new recipe")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    public ResponseEntity<?> create(@ModelAttribute @Valid RecipeCreateDTO recipeCreateDTO,
             BindingResult bindingResult,
-            @RequestParam("imageFile") MultipartFile imageFile,
-            RedirectAttributes redirectAttributes,
-            Model model) {
+            @RequestParam("imageFile") MultipartFile imageFile) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("recipeCreateDTO", recipeCreateDTO);
-
-            var categories = categoryService.findAll();
-            model.addAttribute("categories", categories);
-            return "manage/recipes/create";
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -151,63 +102,29 @@ public class RecipeController {
                 recipeCreateDTO.setImage(folder.toString().replace("src/main/resources/static", "") + "/" + fileName);
             } catch (Exception e) {
                 e.printStackTrace();
-                Message errorMessage = new Message("error", "Failed to upload image");
-                model.addAttribute("message", errorMessage);
-                var categories = categoryService.findAll();
-                model.addAttribute("categories", categories);
-
-                bindingResult.rejectValue("image", "image", "Failed to upload image");
-                return "manage/recipes/create";
+                return ResponseEntity.badRequest().body(new Message("error", "Failed to upload image"));
             }
         }
 
         var result = recipeService.create(recipeCreateDTO);
 
         if (result == null) {
-            var errorMessage = new Message("error", "Failed to create recipe");
-            model.addAttribute("message", errorMessage);
-
-            var categories = categoryService.findAll();
-            model.addAttribute("categories", categories);
-            return "manage/recipes/create";
+            return ResponseEntity.badRequest().body(new Message("error", "Failed to create recipe"));
         }
 
-        var successMessage = new Message("success", "Recipe created successfully");
-        redirectAttributes.addFlashAttribute("message", successMessage);
-        return "redirect:/manage/recipes";
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/edit/{id}")
-    public String edit(@PathVariable UUID id, Model model) {
-        var recipeDTO = recipeService.findById(id);
-        model.addAttribute("recipeDTO", recipeDTO);
-
-        var categories = categoryService.findAll();
-        model.addAttribute("categories", categories);
-
-        var ingredients = ingredientService.findAll();
-        model.addAttribute("ingredients", ingredients);
-
-        return "manage/recipes/edit";
-    }
-
-    @PostMapping("/edit/{id}")
-    public String edit(@PathVariable UUID id,
+    @PutMapping("/{id}")
+    @Operation(summary = "Edit recipe by id")
+    @ApiResponse(responseCode = "200", description = "Return edited recipe")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    public ResponseEntity<?> edit(@PathVariable UUID id,
             @ModelAttribute @Valid RecipeDTO recipeDTO,
             BindingResult bindingResult,
-            @RequestParam("imageFile") MultipartFile imageFile,
-            RedirectAttributes redirectAttributes,
-            Model model) {
+            @RequestParam("imageFile") MultipartFile imageFile) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("recipeDTO", recipeDTO);
-
-            var categories = categoryService.findAll();
-            model.addAttribute("categories", categories);
-
-            var ingredients = ingredientService.findAll();
-            model.addAttribute("ingredients", ingredients);
-
-            return "manage/recipes/edit";
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
         var oldRecipe = recipeService.findById(id);
@@ -236,52 +153,55 @@ public class RecipeController {
                 recipeDTO.setImage(folder.toString().replace("src/main/resources/static", "") + "/" + fileName);
             } catch (Exception e) {
                 e.printStackTrace();
-                Message errorMessage = new Message("error", "Failed to upload image");
-                model.addAttribute("message", errorMessage);
-
-                var categories = categoryService.findAll();
-                model.addAttribute("categories", categories);
-
-                var ingredients = ingredientService.findAll();
-                model.addAttribute("ingredients", ingredients);
-
-                bindingResult.rejectValue("image", "image", "Failed to upload image");
-                return "manage/recipes/edit";
+                return ResponseEntity.badRequest().body(new Message("error", "Failed to upload image"));
             }
         }
 
         var result = recipeService.update(id, recipeDTO);
 
         if (result == null) {
-            var errorMessage = new Message("error", "Failed to update recipe");
-            model.addAttribute("message", errorMessage);
-
-            var categories = categoryService.findAll();
-            model.addAttribute("categories", categories);
-
-            var ingredients = ingredientService.findAll();
-            model.addAttribute("ingredients", ingredients);
-
-            return "manage/recipes/edit";
-
+            return ResponseEntity.badRequest().body(new Message("error", "Failed to update recipe"));
         }
 
-        var successMessage = new Message("success", "Recipe updated successfully");
-        redirectAttributes.addFlashAttribute("message", successMessage);
-        return "redirect:/manage/recipes";
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/delete/{id}")
-    public String delete(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Boolean> delete(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
         var result = recipeService.deleteById(id);
 
-        if (!result) {
-            var errorMessage = new Message("error", "Failed to delete recipe");
-            redirectAttributes.addFlashAttribute("message", errorMessage);
-        } else {
-            var successMessage = new Message("success", "Recipe deleted successfully");
-            redirectAttributes.addFlashAttribute("message", successMessage);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/{id}/ingredients")
+    @Operation(summary = "Add ingredient to recipe")
+    @ApiResponse(responseCode = "200", description = "Return true if add success")
+    @ApiResponse(responseCode = "404", description = "Return false if recipe not found")
+    public ResponseEntity<Boolean> addIngredients(@PathVariable UUID id,
+            @RequestBody RecipeIngredientDTO recipeIngredientDTO) {
+        var recipe = recipeService.findById(id);
+        if (recipe == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        return "redirect:/manage/recipes";
+
+        var result = recipeService.addIngredient(recipe, recipeIngredientDTO);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{id}/ingredients/{ingredientId}")
+    @Operation(summary = "Delete ingredient by id")
+    @ApiResponse(responseCode = "200", description = "Return true if delete success")
+    @ApiResponse(responseCode = "404", description = "Return false if recipe not found")
+    public ResponseEntity<Boolean> deleteIngredients(@PathVariable UUID id,
+            @PathVariable UUID ingredientId) {
+        var recipe = recipeService.findById(id);
+        if (recipe == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        boolean result = recipeService.deleteIngredient(recipe, ingredientId);
+
+        return ResponseEntity.ok(result);
     }
 }
