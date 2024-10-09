@@ -1,0 +1,26 @@
+<header class="bg-blue-500 flex justify-between items-center text-white px-4">
+    <a [routerLink]="['/']" class="nav-brand text-2xl font-bold">Recipe App</a>
+    <nav>
+        <ul class="flex justify-center items-center">
+            <li>
+                <a class="nav-link inline-block p-4 hover:bg-blue-700" [routerLink]="['/']">Home</a>
+            </li>
+            <li>
+                <a class="nav-link inline-block p-4 hover:bg-blue-700"
+                    [routerLink]="['/manager/category']">Management</a>
+            </li>
+            <li>
+                <a class="nav-link inline-block p-4 hover:bg-blue-700" [routerLink]="['/about']">About</a>
+            </li>
+            <li>
+                <a class="nav-link inline-block p-4 hover:bg-blue-700" [routerLink]="['/contact']">Contact</a>
+            </li>
+        </ul>
+    </nav>
+    <div class="profile-menu">
+        <div class="anonymous">
+            <a class="nav-link inline-block p-4 hover:bg-blue-700" [routerLink]="['/auth/login']">Login</a>
+            <a class="nav-link inline-block p-4 hover:bg-blue-700" [routerLink]="['/auth/register']">Register</a>
+        </div>
+    </div>
+</header>
