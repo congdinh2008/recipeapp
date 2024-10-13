@@ -1,0 +1,25 @@
+<div class="form-search card border border-slate-300 rounded-md mb-4">
+    <div class="card-header p-3">
+        <h1 class="text-2xl font-semibold">{{selectedId ? 'Edit' : 'Create'}} Ingredient</h1>
+    </div>
+    <form [formGroup]="form" (submit)="onSubmit()">
+        <div class="card-body border-y border-slate-300 flex p-3">
+            <div class="form-group w-full mb-3 px-3">
+                <label for="name" class="block mb-2">Name</label>
+                <input type="text" id="name" formControlName="name"
+                    class="form-control w-full p-2 border border-slate-300 rounded-md" placeholder="Ingredient name">
+            </div>
+        </div>
+        <div class="card-footer p-3 flex justify-end gap-3">
+            <button type="button" class="p-2 px-4 bg-slate-400 text-white rounded-full" title="Create Ingredient"
+                (click)="onCancel()">
+                Cancel
+            </button>
+            <button type="button" class="p-2 px-4 bg-red-500 text-white rounded-full" title="Create Ingredient"
+                (click)="onReset()">
+                Reset
+            </button>
+            <button type="submit" class="p-2 px-4 bg-blue-500 text-white rounded-full">Save</button>
+        </div>
+    </form>
+</div>

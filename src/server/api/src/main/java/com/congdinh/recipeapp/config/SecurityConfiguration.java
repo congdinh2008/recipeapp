@@ -58,7 +58,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/roles/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .requestMatchers("/api/recipes/**").hasRole("ADMIN")
-                        .requestMatchers("/api/ingredients/**").hasRole("ADMIN")
+                        .requestMatchers("/api/ingredients/**").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults());
         return http.build();
