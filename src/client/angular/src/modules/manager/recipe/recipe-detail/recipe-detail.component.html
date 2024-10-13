@@ -1,0 +1,53 @@
+<div class="form-search card border border-slate-300 rounded-md mb-4">
+  <div class="card-header p-3">
+    <h1 class="text-2xl font-semibold">{{selectedId ? 'Edit' : 'Create'}} Recipe</h1>
+  </div>
+  <form [formGroup]="form" (submit)="onSubmit()">
+    <div class="card-body border-y border-slate-300 flex p-3 flex-wrap">
+      <div class="form-group w-1/2 mb-3 px-3">
+        <label for="title" class="block mb-2">Title</label>
+        <input type="text" id="title" formControlName="title"
+          class="form-control w-full p-2 border border-slate-300 rounded-md" placeholder="Recipe title">
+      </div>
+      <div class="form-group w-1/2 mb-3 px-3">
+        <label for="prepTime" class="block mb-2">Preparation Time</label>
+        <input type="number" id="prepTime" formControlName="prepTime"
+          class="form-control w-full p-2 border border-slate-300 rounded-md" placeholder="Recipe preparation time">
+      </div>
+      <div class="form-group w-1/2 mb-3 px-3">
+        <label for="cookTime" class="block mb-2">Cooking Time</label>
+        <input type="number" id="cookTime" formControlName="cookTime"
+          class="form-control w-full p-2 border border-slate-300 rounded-md" placeholder="Recipe cooking time">
+      </div>
+      <div class="form-group w-1/2 mb-3 px-3">
+        <label for="servings" class="block mb-2">Number of Servings</label>
+        <input type="number" id="servings" formControlName="servings"
+          class="form-control w-full p-2 border border-slate-300 rounded-md" placeholder="Number of servings">
+      </div>
+      <div class="form-group w-1/2 mb-3 px-3">
+        <label for="description" class="block mb-2">Description</label>
+        <textarea type="text" id="description" formControlName="description"
+          class="form-control w-full p-2 border border-slate-300 rounded-md" placeholder="Description"></textarea>
+      </div>
+      <div class="form-group w-1/2 mb-3 px-3">
+        <label for="category" class="block mb-2">Category</label>
+        <select id="category" formControlName="categoryId"
+          class="form-control w-full p-2 border border-slate-300 rounded-md">
+          <option value="">Select Category</option>
+          <option *ngFor="let category of categories" [value]="category.id">{{category.name}}</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-footer p-3 flex justify-end gap-3">
+      <button type="button" class="p-2 px-4 bg-slate-400 text-white rounded-full" title="Create Recipe"
+        (click)="onCancel()">
+        Cancel
+      </button>
+      <button type="button" class="p-2 px-4 bg-red-500 text-white rounded-full" title="Create Recipe"
+        (click)="onReset()">
+        Reset
+      </button>
+      <button type="submit" class="p-2 px-4 bg-blue-500 text-white rounded-full">Save</button>
+    </div>
+  </form>
+</div>

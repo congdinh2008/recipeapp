@@ -103,36 +103,9 @@ public class RecipeController {
     @ApiResponse(responseCode = "200", description = "Return new recipe")
     @ApiResponse(responseCode = "400", description = "Bad request")
     public ResponseEntity<?> create(@RequestBody @Valid RecipeCreateDTO recipeCreateDTO,
-            BindingResult bindingResult,
-            @RequestParam("imageFile") MultipartFile imageFile) {
+            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
-        }
-
-        if (imageFile != null && !imageFile.isEmpty()) {
-            try {
-                byte[] bytes = imageFile.getBytes();
-                // Create folder if not exist following format:
-                // src/main/resources/static/images/recipes/year/month/day
-                LocalDateTime date = LocalDateTime.now();
-                Path folder = Paths.get("src/main/resources/static/images/recipes/" + date.getYear() + "/"
-                        + date.getMonthValue() + "/" + date.getDayOfMonth());
-                if (!Files.exists(folder)) {
-                    Files.createDirectories(folder);
-                }
-                // Create file name following format: originalFileName + epochTime + extension
-                String originalFileName = imageFile.getOriginalFilename();
-                // Convert date to string epoch time
-                Long epochTime = Instant.now().getEpochSecond();
-                String fileName = originalFileName.substring(0, originalFileName.lastIndexOf(".")) + "-" + epochTime
-                        + originalFileName.substring(originalFileName.lastIndexOf("."));
-                Path path = Paths.get(folder.toString(), fileName);
-                Files.write(path, bytes);
-                recipeCreateDTO.setImage(folder.toString().replace("src/main/resources/static", "") + "/" + fileName);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ResponseEntity.badRequest().body(new Message("error", "Failed to upload image"));
-            }
         }
 
         var result = recipeService.create(recipeCreateDTO);
@@ -150,40 +123,9 @@ public class RecipeController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     public ResponseEntity<?> edit(@PathVariable UUID id,
             @RequestBody @Valid RecipeDTO recipeDTO,
-            BindingResult bindingResult,
-            @RequestParam("imageFile") MultipartFile imageFile) {
+            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
-        }
-
-        var oldRecipe = recipeService.findById(id);
-
-        if (imageFile.getOriginalFilename().isEmpty()) {
-            recipeDTO.setImage(oldRecipe.getImage());
-        } else {
-            try {
-                byte[] bytes = imageFile.getBytes();
-                // Create folder if not exist following format:
-                // src/main/resources/static/images/recipes/year/month/day
-                LocalDateTime date = LocalDateTime.now();
-                Path folder = Paths.get("src/main/resources/static/images/recipes/" + date.getYear() + "/"
-                        + date.getMonthValue() + "/" + date.getDayOfMonth());
-                if (!Files.exists(folder)) {
-                    Files.createDirectories(folder);
-                }
-                // Create file name following format: originalFileName + epochTime + extension
-                String originalFileName = imageFile.getOriginalFilename();
-                // Convert date to string epoch time
-                Long epochTime = Instant.now().getEpochSecond();
-                String fileName = originalFileName.substring(0, originalFileName.lastIndexOf(".")) + "-" + epochTime
-                        + originalFileName.substring(originalFileName.lastIndexOf("."));
-                Path path = Paths.get(folder.toString(), fileName);
-                Files.write(path, bytes);
-                recipeDTO.setImage(folder.toString().replace("src/main/resources/static", "") + "/" + fileName);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ResponseEntity.badRequest().body(new Message("error", "Failed to upload image"));
-            }
         }
 
         var result = recipeService.update(id, recipeDTO);
