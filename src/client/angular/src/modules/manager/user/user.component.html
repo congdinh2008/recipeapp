@@ -1,0 +1,153 @@
+<section class="manager">
+    <!-- Card search -->
+    <div class="form-search card border border-slate-300 rounded-md mb-4">
+        <div class="card-header p-3">
+            <h1 class="text-2xl font-semibold">User Management</h1>
+        </div>
+        <form [formGroup]="form" (submit)="onSearch()">
+            <div class="card-body border-y border-slate-300 p-3">
+                <div class="form-group mb-3">
+                    <label for="keyword" class="block mb-2">Keyword</label>
+                    <input type="text" id="keyword" formControlName="keyword"
+                        class="form-control w-full p-2 border border-slate-300 rounded-md"
+                        placeholder="Search by keyword">
+                </div>
+            </div>
+            <div class="card-footer p-3 flex justify-between">
+                <button type="button" class="p-2 px-4 bg-green-500 text-white rounded-full" title="Create User"
+                    (click)="onCreate()">
+                    Create
+                </button>
+
+                <div class="search-buttons flex gap-3">
+                    <button type="button" class="p-2 px-4 bg-red-500 text-white rounded-full" title="Reset Search"
+                        (click)="onReset()">
+                        Reset
+                    </button>
+                    <button type="submit" class="p-2 px-4 bg-blue-500 text-white rounded-full">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Card List -->
+    <ng-container *ngIf="data !=null && data.items.length > 0">
+        <div class="card border border-slate-300 rounded-md my-4">
+            <div class="card-body p-3 border-y border-slate-300">
+                <table class="table-auto w-full">
+                    <thead>
+                        <tr class="*:p-2 *:text-left *:border *:border-slate-300">
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Username</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of data.items" class="*:p-2 *:text-left *:border *:border-slate-300">
+                            <td>{{item.firstName}}</td>
+                            <td>{{item.lastName}}</td>
+                            <td>{{item.email}}</td>
+                            <td>{{item.username}}</td>
+                            <td>
+                                <div class="action flex justify-center items-center gap-3">
+                                    <button type="button" class="btn btn-sm btn-primary" title="Edit User"
+                                        (click)="onEdit(item.id)">
+                                        <i class="fa-solid fa-edit text-blue-500"></i>
+                                        <fa-icon [icon]="faEdit" class="text-blue-500"></fa-icon>
+                                    </button>
+                                    <button type="button" title="Delete User" (click)="onDelete(item.id)"
+                                        class="btn btn-sm btn-danger">
+                                        <fa-icon [icon]="faTrash" class="text-red-500"></fa-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer pagination p-3 flex justify-between items-center">
+                <!-- Select page size -->
+                <div class="select-size">
+                    <label for="pageSize" class="text-sm font-medium text-gray-700 me-2">Page Size:</label>
+                    <!-- Select size - keep keyword and reset page to page 1 -->
+                    <select id="pageSize" name="pageSize" class="p-2 border border-slate-300 rounded-md"
+                        (change)="onPageSize($event)">
+                        <option *ngFor="let size of pageSizes" [value]="size" [selected]="size == currentPageSize">
+                            {{size}}</option>
+                    </select>
+                </div>
+                <!-- Pagination -->
+                <ul class="page-menu flex justify-center items-center gap-2">
+                    <li class="page-item">
+                        <a class="w-8 h-8 flex justify-center items-center page-link p-2 bg-slate-300 hover:bg-blue-500 hover:text-white rounded-full cursor-pointer"
+                            [ngClass]="{'pointer-events-none !bg-slate-200 text-slate-400' : 0 === currentPage}"
+                            (click)="onChangePageNumber(0)">
+                            <fa-icon [icon]="faAngleDoubleLeft"></fa-icon>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="w-8 h-8 flex justify-center items-center page-link p-2 bg-slate-300 hover:bg-blue-500 hover:text-white rounded-full cursor-pointer"
+                            [ngClass]="{'pointer-events-none !bg-slate-200 text-slate-400' : 0 === currentPage}"
+                            (click)="onChangePageNumber(currentPage - 1)">
+                            <fa-icon [icon]="faAngleLeft"></fa-icon>
+                        </a>
+                    </li>
+
+                    <li class="page-item"
+                        *ngFor="let i of getPageSequence(currentPage, pageLimit, data.page.totalPages)">
+                        <!-- Page i and size 2 -->
+                        <a class="w-8 h-8 flex justify-center items-center page-link p-2 bg-slate-300 hover:bg-blue-500 hover:text-white rounded-full cursor-pointer"
+                            [ngClass]="{ '!bg-blue-500 text-white': i === currentPage }"
+                            (click)="onChangePageNumber(i)">
+                            {{ i + 1 }}
+                        </a>
+                    </li>
+
+                    <li class="page-item">
+                        <a class="w-8 h-8 flex justify-center items-center page-link p-2 bg-slate-300 hover:bg-blue-500 hover:text-white rounded-full cursor-pointer"
+                            [ngClass]="{'pointer-events-none !bg-slate-200 text-slate-400' : data.page.totalPages - 1 === currentPage}"
+                            (click)="onChangePageNumber(currentPage + 1)">
+                            <fa-icon [icon]="faAngleRight"></fa-icon>
+                        </a>
+                    </li>
+
+                    <li class="page-item">
+                        <a class="w-8 h-8 flex justify-center items-center page-link p-2 bg-slate-300 hover:bg-blue-500 hover:text-white rounded-full cursor-pointer"
+                            [ngClass]="{'pointer-events-none !bg-slate-200 text-slate-400' : data.page.totalPages - 1 === currentPage}"
+                            (click)="onChangePageNumber(data.page.totalPages - 1)">
+                            <fa-icon [icon]="faAngleDoubleRight"></fa-icon>
+                        </a>
+                    </li>
+                </ul>
+                <!-- Page Info -->
+                <div class="page-info">
+                    <!-- 1-2 of 7 items -->
+                    <span class="text-gray-700">{{data.page.number*data.page.size+1}}</span> -
+                    <span>
+                        {{(data.page.number + 1) * data.page.size > data.page.totalElements ?
+                        data.page.totalElements : (data.page.number+1) * data.page.size}}
+                    </span>
+                    of
+                    <span>{{data.page.totalElements}}</span>
+                    items
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="data !=null && data.items.length == 0">
+        <div class="card border border-slate-300 rounded-md">
+            <div class="card-body p-3 border-y border-slate-300">
+                <p class="text-center text-gray-500">No data found</p>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Create/Edit User -->
+    <app-user-detail *ngIf="isShowDetail" [id]="selectedId" (onClose)="onCancel($event)" (onSave)="onSave($event)">
+    </app-user-detail>
+
+</section>
