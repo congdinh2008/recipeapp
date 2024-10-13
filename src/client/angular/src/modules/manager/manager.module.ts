@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CategoryListComponent } from './category/category-list/category-list.component';
+import { CategoryComponent } from './category/category.component';
 import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
     path: 'category',
-    component: CategoryListComponent,
+    loadChildren: () => import('./category/category.module').then(m => m.CategoryModule)
   }
 ];
 
