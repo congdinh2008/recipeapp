@@ -3,6 +3,7 @@ package com.congdinh.recipeapp.controllers;
 import java.nio.file.*;
 import java.time.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -58,6 +59,31 @@ public class RecipeController {
         return ResponseEntity.ok(pagedModel);
     }
 
+    @PostMapping("/search")
+    @Operation(summary = "Search recipes")
+    @ApiResponse(responseCode = "200", description = "Return recipes by search")
+    public ResponseEntity<?> search(@RequestBody RecipeSearchDTO recipeSearchDTO) {
+        Pageable pageable = PageRequest.of(recipeSearchDTO.getPage(), recipeSearchDTO.getSize(),
+                Sort.by(Sort.Direction.fromString(recipeSearchDTO.getDirection().toString()),
+                        recipeSearchDTO.getSort()));
+
+        var result = recipeService.findAll(recipeSearchDTO.getKeyword(), pageable);
+
+        // Convert to PagedModel
+        var pagedModel = pagedResourcesAssembler.toModel(result);
+
+        // Extract content without links
+        List<RecipeDTO> contentWithoutLinks = pagedModel.getContent().stream()
+                .map(entityModel -> entityModel.getContent())
+                .collect(Collectors.toList());
+
+        var response = new HashMap<String, Object>();
+        response.put("items", contentWithoutLinks);
+        response.put("page", pagedModel.getMetadata());
+        response.put("links", pagedModel.getLinks());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get recipe by id")
     @ApiResponse(responseCode = "200", description = "Return recipe by id")
@@ -76,7 +102,7 @@ public class RecipeController {
     @Operation(summary = "Create new recipe")
     @ApiResponse(responseCode = "200", description = "Return new recipe")
     @ApiResponse(responseCode = "400", description = "Bad request")
-    public ResponseEntity<?> create(@ModelAttribute @Valid RecipeCreateDTO recipeCreateDTO,
+    public ResponseEntity<?> create(@RequestBody @Valid RecipeCreateDTO recipeCreateDTO,
             BindingResult bindingResult,
             @RequestParam("imageFile") MultipartFile imageFile) {
         if (bindingResult.hasErrors()) {
@@ -123,7 +149,7 @@ public class RecipeController {
     @ApiResponse(responseCode = "200", description = "Return edited recipe")
     @ApiResponse(responseCode = "400", description = "Bad request")
     public ResponseEntity<?> edit(@PathVariable UUID id,
-            @ModelAttribute @Valid RecipeDTO recipeDTO,
+            @RequestBody @Valid RecipeDTO recipeDTO,
             BindingResult bindingResult,
             @RequestParam("imageFile") MultipartFile imageFile) {
         if (bindingResult.hasErrors()) {

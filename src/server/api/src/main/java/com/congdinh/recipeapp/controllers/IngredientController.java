@@ -1,12 +1,16 @@
 package com.congdinh.recipeapp.controllers;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
 import com.congdinh.recipeapp.dtos.ingredient.*;
 import com.congdinh.recipeapp.sevices.IngredientService;
 
@@ -51,6 +55,31 @@ public class IngredientController {
         return ResponseEntity.ok(pagedModel);
     }
 
+    @PostMapping("/search")
+    @Operation(summary = "Search ingredients")
+    @ApiResponse(responseCode = "200", description = "Return ingredients by search")
+    public ResponseEntity<?> search(@RequestBody IngredientSearchDTO ingredientSearchDTO) {
+        Pageable pageable = PageRequest.of(ingredientSearchDTO.getPage(), ingredientSearchDTO.getSize(),
+                Sort.by(Sort.Direction.fromString(ingredientSearchDTO.getDirection().toString()),
+                        ingredientSearchDTO.getSort()));
+
+        var result = ingredientService.findAll(ingredientSearchDTO.getKeyword(), pageable);
+
+        // Convert to PagedModel
+        var pagedModel = pagedResourcesAssembler.toModel(result);
+
+        // Extract content without links
+        List<IngredientDTO> contentWithoutLinks = pagedModel.getContent().stream()
+                .map(entityModel -> entityModel.getContent())
+                .collect(Collectors.toList());
+
+        var response = new HashMap<String, Object>();
+        response.put("items", contentWithoutLinks);
+        response.put("page", pagedModel.getMetadata());
+        response.put("links", pagedModel.getLinks());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get ingredient by id")
     @ApiResponse(responseCode = "200", description = "Return ingredient by id")
@@ -64,7 +93,7 @@ public class IngredientController {
     @Operation(summary = "Create new ingredient")
     @ApiResponse(responseCode = "200", description = "Return new ingredient")
     @ApiResponse(responseCode = "400", description = "Return error message")
-    public ResponseEntity<?> create(@Valid @ModelAttribute IngredientCreateDTO ingredientCreateDTO,
+    public ResponseEntity<?> create(@Valid @RequestBody IngredientCreateDTO ingredientCreateDTO,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
@@ -84,7 +113,7 @@ public class IngredientController {
     @ApiResponse(responseCode = "200", description = "Return edited ingredient")
     @ApiResponse(responseCode = "400", description = "Return error message")
     public ResponseEntity<?> edit(@PathVariable UUID id,
-            @ModelAttribute @Valid IngredientDTO ingredientDTO,
+            @RequestBody @Valid IngredientDTO ingredientDTO,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());

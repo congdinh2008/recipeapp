@@ -1,6 +1,9 @@
 package com.congdinh.recipeapp.controllers;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -53,6 +56,31 @@ public class UserController {
         return ResponseEntity.ok(pagedModel);
     }
 
+    @PostMapping("/search")
+    @Operation(summary = "Search users")
+    @ApiResponse(responseCode = "200", description = "Return users by search")
+    public ResponseEntity<?> search(@RequestBody UserSearchDTO userSearchDTO) {
+        Pageable pageable = PageRequest.of(userSearchDTO.getPage(), userSearchDTO.getSize(),
+                Sort.by(Sort.Direction.fromString(userSearchDTO.getDirection().toString()),
+                        userSearchDTO.getSort()));
+
+        var result = userService.findAll(userSearchDTO.getKeyword(), pageable);
+
+        // Convert to PagedModel
+        var pagedModel = pagedResourcesAssembler.toModel(result);
+
+        // Extract content without links
+        List<UserDTO> contentWithoutLinks = pagedModel.getContent().stream()
+                .map(entityModel -> entityModel.getContent())
+                .collect(Collectors.toList());
+
+        var response = new HashMap<String, Object>();
+        response.put("items", contentWithoutLinks);
+        response.put("page", pagedModel.getMetadata());
+        response.put("links", pagedModel.getLinks());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get user by id")
     @ApiResponse(responseCode = "200", description = "Return user by id")
@@ -71,7 +99,7 @@ public class UserController {
     @Operation(summary = "Create new user")
     @ApiResponse(responseCode = "200", description = "Return new user")
     @ApiResponse(responseCode = "400", description = "Return error message")
-    public ResponseEntity<?> create(@Valid @ModelAttribute UserCreateDTO userCreateDTO,
+    public ResponseEntity<?> create(@Valid @RequestBody UserCreateDTO userCreateDTO,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
@@ -91,7 +119,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "Return edited user")
     @ApiResponse(responseCode = "400", description = "Return error message")
     public ResponseEntity<?> edit(@PathVariable UUID id,
-            @Valid @ModelAttribute UserDTO userDTO,
+            @Valid @RequestBody UserDTO userDTO,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());

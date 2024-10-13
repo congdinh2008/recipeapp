@@ -1,6 +1,9 @@
 package com.congdinh.recipeapp.controllers;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -52,6 +55,31 @@ public class RoleController {
         return ResponseEntity.ok(pagedModel);
     }
 
+    @PostMapping("/search")
+    @Operation(summary = "Search roles")
+    @ApiResponse(responseCode = "200", description = "Return roles by search")
+    public ResponseEntity<?> search(@RequestBody RoleSearchDTO roleSearchDTO) {
+        Pageable pageable = PageRequest.of(roleSearchDTO.getPage(), roleSearchDTO.getSize(),
+                Sort.by(Sort.Direction.fromString(roleSearchDTO.getDirection().toString()),
+                        roleSearchDTO.getSort()));
+
+        var result = roleService.findAll(roleSearchDTO.getKeyword(), pageable);
+
+        // Convert to PagedModel
+        var pagedModel = pagedResourcesAssembler.toModel(result);
+
+        // Extract content without links
+        List<RoleDTO> contentWithoutLinks = pagedModel.getContent().stream()
+                .map(entityModel -> entityModel.getContent())
+                .collect(Collectors.toList());
+
+        var response = new HashMap<String, Object>();
+        response.put("items", contentWithoutLinks);
+        response.put("page", pagedModel.getMetadata());
+        response.put("links", pagedModel.getLinks());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get role by id")
     @ApiResponse(responseCode = "200", description = "Return role by id")
@@ -68,7 +96,7 @@ public class RoleController {
     @Operation(summary = "Create new role")
     @ApiResponse(responseCode = "200", description = "Return new role")
     @ApiResponse(responseCode = "400", description = "Bad request")
-    public ResponseEntity<?> create(@Valid @ModelAttribute RoleCreateDTO roleCreateDTO,
+    public ResponseEntity<?> create(@Valid @RequestBody RoleCreateDTO roleCreateDTO,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
@@ -87,7 +115,7 @@ public class RoleController {
     @Operation(summary = "Edit role by id")
     @ApiResponse(responseCode = "200", description = "Return edited role")
     @ApiResponse(responseCode = "400", description = "Bad request")
-    public ResponseEntity<?> edit(@PathVariable UUID id, @Valid @ModelAttribute RoleDTO roleDTO,
+    public ResponseEntity<?> edit(@PathVariable UUID id, @Valid @RequestBody RoleDTO roleDTO,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
