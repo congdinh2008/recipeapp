@@ -2,19 +2,19 @@
 INSERT INTO [recipeapp_dev].[dbo].[categories]
     ([id], [description], [name])
 VALUES
-    (NEWID(), N'Bữa cơm gia đình', 'Bữa cơm gia đình'),
-    (NEWID(), N'Các món ngon với phở', 'Các món ngon với phở'),
-    (NEWID(), N'Món ngon từ thịt heo', 'Món ngon từ thịt heo'),
-    (NEWID(), N'Đồ ăn vặt', 'Đồ ăn vặt'),
-    (NEWID(), N'Các món ngon với bún', 'Các món ngon với bún'),
-    (NEWID(), N'Bữa tối ngon miệng, hấp dẫn', 'Bữa Tối'),
-    (NEWID(), N'Món ngon từ cá', 'Món ngon từ cá'),
-    (NEWID(), N'Bánh mì', 'Bánh mì'),
-    (NEWID(), N'Bữa sáng ngon miệng, bổ dưỡng', 'Bữa Sáng'),
-    (NEWID(), N'Các món lẩu', 'Các món lẩu'),
-    (NEWID(), N'Món ngon từ thịt bò', 'Món ngon từ thịt bò'),
-    (NEWID(), N'Món ngon từ gà', 'Món ngon từ gà'),
-    (NEWID(), N'Đồ ăn chay', 'Đồ ăn chay');
+    (NEWID(), N'Bữa cơm gia đình', N'Bữa cơm gia đình'),
+    (NEWID(), N'Các món ngon với phở', N'Các món ngon với phở'),
+    (NEWID(), N'Món ngon từ thịt heo', N'Món ngon từ thịt heo'),
+    (NEWID(), N'Đồ ăn vặt', N'Đồ ăn vặt'),
+    (NEWID(), N'Các món ngon với bún', N'Các món ngon với bún'),
+    (NEWID(), N'Bữa tối ngon miệng, hấp dẫn', N'Bữa Tối'),
+    (NEWID(), N'Món ngon từ cá', N'Món ngon từ cá'),
+    (NEWID(), N'Bánh mì', N'Bánh mì'),
+    (NEWID(), N'Bữa sáng ngon miệng, bổ dưỡng', N'Bữa Sáng'),
+    (NEWID(), N'Các món lẩu', N'Các món lẩu'),
+    (NEWID(), N'Món ngon từ thịt bò', N'Món ngon từ thịt bò'),
+    (NEWID(), N'Món ngon từ gà', N'Món ngon từ gà'),
+    (NEWID(), N'Đồ ăn chay', N'Đồ ăn chay');
 
 -- Insert ingredients
 INSERT INTO [recipeapp_dev].[dbo].[ingredients]
